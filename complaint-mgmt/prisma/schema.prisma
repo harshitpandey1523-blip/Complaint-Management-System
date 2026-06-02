@@ -1,0 +1,102 @@
+// Complaint Management System — Prisma Schema
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ─── Enums ───────────────────────────────────────────────
+
+enum Role {
+  ADMIN
+  AGENT
+  CUSTOMER
+}
+
+enum Status {
+  OPEN
+  IN_PROGRESS
+  AWAITING_CUSTOMER
+  RESOLVED
+  CLOSED
+}
+
+enum Priority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+enum Category {
+  PRODUCT_DEFECT
+  SHIPPING_DELAY
+  WRONG_ITEM
+  REFUND_REQUEST
+  BILLING_ISSUE
+  ACCOUNT_ISSUE
+  OTHER
+}
+
+// ─── Models ──────────────────────────────────────────────
+
+model User {
+  id        String   @id @default(cuid())
+  name      String
+  email     String   @unique
+  role      Role     @default(CUSTOMER)
+  avatar    String?
+  createdAt DateTime @default(now())
+
+  // Relations
+  complaintsCreated  Complaint[] @relation("CustomerComplaints")
+  complaintsAssigned Complaint[] @relation("AgentComplaints")
+  comments           Comment[]
+}
+
+model Complaint {
+  id          String    @id @default(cuid())
+  subject     String
+  description String
+  orderId     String?
+  category    Category  @default(OTHER)
+  priority    Priority  @default(MEDIUM)
+  status      Status    @default(OPEN)
+  resolution  String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  resolvedAt  DateTime?
+
+  // Relations
+  customerId   String
+  customer     User   @relation("CustomerComplaints", fields: [customerId], references: [id])
+  assignedToId String?
+  assignedTo   User?  @relation("AgentComplaints", fields: [assignedToId], references: [id])
+
+  comments Comment[]
+
+  @@index([status])
+  @@index([priority])
+  @@index([category])
+  @@index([customerId])
+  @@index([assignedToId])
+}
+
+model Comment {
+  id          String   @id @default(cuid())
+  content     String
+  isInternal  Boolean  @default(false)
+  createdAt   DateTime @default(now())
+
+  // Relations
+  complaintId String
+  complaint   Complaint @relation(fields: [complaintId], references: [id], onDelete: Cascade)
+  userId      String
+  user        User      @relation(fields: [userId], references: [id])
+
+  @@index([complaintId])
+}

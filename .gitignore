@@ -1,0 +1,33 @@
+# dependencies
+**/node_modules
+**/.pnp
+**/.pnp.*
+**/.yarn/*
+
+# testing
+**/coverage
+
+# next.js build output
+**/.next/
+**/out/
+**/build
+
+# debug & logs
+**/*.log*
+**/.DS_Store
+**/*.pem
+**/*.tsbuildinfo
+**/next-env.d.ts
+
+# env files
+**/.env*
+
+# sqlite database files
+**/*.db
+**/*.db-journal
+
+# generated prisma clients
+**/src/generated/prisma
+
+# vercel
+**/.vercel
